@@ -113,6 +113,7 @@ async function getProducts() {
           nodes {
             id
             title
+            # maxHeight query is deprecated
             image {
               url
             }
