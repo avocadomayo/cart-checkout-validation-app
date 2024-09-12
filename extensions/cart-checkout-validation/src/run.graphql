@@ -1,0 +1,22 @@
+query RunInput {
+  cart {
+    lines {
+      quantity
+      merchandise {
+        __typename
+        ... on ProductVariant {
+          id
+          product {
+            title
+          }
+        }
+      }
+    }
+  }
+  validation {
+    # these are some data stores for the app?
+    metafield(namespace: "$app:product-limits", key: "product-limits-values") {
+      value
+    }
+  }
+}
