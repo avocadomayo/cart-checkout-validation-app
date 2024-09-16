@@ -48,6 +48,7 @@ function ValidationSettings({
 
   const { applyMetafieldChange } = useApi("admin.settings.validation.render");
 
+  // Read existing product variant limits from metafield
   const settings = createSettings(products, configuration);
 
   const onError = (errors: FunctionSettingsError[]) => {
@@ -61,6 +62,7 @@ function ValidationSettings({
       [variant.id]: Number(value),
     };
 
+    // Write updated product variant limits to metafield
     const result = await applyMetafieldChange({
       type: "updateMetafield",
       namespace: "$app:product-limits",
