@@ -3,7 +3,7 @@
 client_id = "673c3432a54a7176547f5ab3126bec7d"
 name = "cart-checkout-validation-app"
 handle = "cart-checkout-validation-app-2"
-application_url = "https://vii-physicians-commissioners-rolling.trycloudflare.com"
+application_url = "https://common-interest-lately-spam.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "read_products,write_products"
 
 [auth]
 redirect_urls = [
-  "https://vii-physicians-commissioners-rolling.trycloudflare.com/auth/callback",
-  "https://vii-physicians-commissioners-rolling.trycloudflare.com/auth/shopify/callback",
-  "https://vii-physicians-commissioners-rolling.trycloudflare.com/api/auth/callback"
+  "https://common-interest-lately-spam.trycloudflare.com/auth/callback",
+  "https://common-interest-lately-spam.trycloudflare.com/auth/shopify/callback",
+  "https://common-interest-lately-spam.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

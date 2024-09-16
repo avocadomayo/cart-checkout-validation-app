@@ -39,28 +39,6 @@ const shopify = shopifyApp({
   ...(process.env.SHOP_CUSTOM_DOMAIN
     ? { customShopDomains: [process.env.SHOP_CUSTOM_DOMAIN] }
     : {}),
-  hooks: {
-    afterAuth: async({admin}) => {
-      const definition = {
-        access: {
-          // TODO: should we provide additional resources for this part?
-          admin: "MERCHANT_READ_WRITE",
-        },
-        // TODO: make connection with run.graphql
-        key: "product-limits-values",
-        name: "Validation Configuration",
-        namespace: "$app:product-limits",
-        ownerType: "VALIDATION",
-        type: "json",
-      }
-
-      await admin.graphql(mutation, {
-        variables: {
-          definition,
-        },
-      });
-    },
-  },
 });
 
 export default shopify;
