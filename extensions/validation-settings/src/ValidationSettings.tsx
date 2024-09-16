@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { FunctionSettingsError } from "@shopify/ui-extensions-react/admin";
 import {
   reactExtension,
@@ -12,7 +13,6 @@ import {
   InlineStack,
   Image,
 } from "@shopify/ui-extensions-react/admin";
-import { useState } from "react";
 
 export default reactExtension(
   "admin.settings.validation.render",
@@ -251,7 +251,10 @@ async function createMetafieldDefinition() {
   return results?.data?.metafieldDefinitionCreate?.createdDefinition;
 }
 
-function createSettings(products: Product[], configuration: Object): Record<string, number> {
+function createSettings(
+  products: Product[],
+  configuration: Object,
+): Record<string, number> {
   const settings = {};
 
   products.forEach(({ variants }) => {
