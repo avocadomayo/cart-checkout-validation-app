@@ -3,7 +3,7 @@
 client_id = "673c3432a54a7176547f5ab3126bec7d"
 name = "cart-checkout-validation-app"
 handle = "cart-checkout-validation-app-2"
-application_url = "https://common-interest-lately-spam.trycloudflare.com"
+application_url = "https://booty-handmade-office-myers.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "read_products,write_products"
 
 [auth]
 redirect_urls = [
-  "https://common-interest-lately-spam.trycloudflare.com/auth/callback",
-  "https://common-interest-lately-spam.trycloudflare.com/auth/shopify/callback",
-  "https://common-interest-lately-spam.trycloudflare.com/api/auth/callback"
+  "https://booty-handmade-office-myers.trycloudflare.com/auth/callback",
+  "https://booty-handmade-office-myers.trycloudflare.com/auth/shopify/callback",
+  "https://booty-handmade-office-myers.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
