@@ -1,15 +1,15 @@
 import { type RemoteRoot } from "@remote-ui/core";
 import {
   extend,
+  Text,
+  Box,
+  FunctionSettings,
   Section,
   NumberField,
-  Box,
-  InlineStack,
-  Text,
   BlockStack,
   Banner,
+  InlineStack,
   Image,
-  FunctionSettings,
   type ValidationSettingsApi,
   type FunctionSettingsError,
 } from "@shopify/ui-extensions/admin";
