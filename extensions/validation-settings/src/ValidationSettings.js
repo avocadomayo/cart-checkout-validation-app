@@ -41,9 +41,9 @@ function renderValidationSettings(
   api,
 ) {
   let errors = [];
+    // Read existing product variant limits from metafield
+    let settings = createSettings(products, configuration);
 
-  // Read existing product variant limits from metafield
-  const settings = createSettings(products, configuration);
 
   const onError = (newErrors) => {
     errors = newErrors.map((e) => e.message);
@@ -52,18 +52,19 @@ function renderValidationSettings(
 
   const onChange = async (variant, value) => {
     errors = [];
-
-    const newSettings = {
+    settings = {
       ...settings,
       [variant.id]: Number(value),
     };
+  };
 
+  const onSave = async () => {
     // Write updated product variant limits to metafield
     const results = await api.applyMetafieldChange({
       type: "updateMetafield",
       namespace: "$app:product-limits",
       key: "product-limits-values",
-      value: JSON.stringify(newSettings),
+      value: JSON.stringify(settings),
     });
 
     if (results.type === "error") {
@@ -94,7 +95,7 @@ function renderValidationSettings(
     return root.append(
       root.createComponent(
         FunctionSettings,
-        { onError },
+        { onSave, onError },
         ...renderErrors(errors, root),
         root.createComponent(
           BlockStack,
