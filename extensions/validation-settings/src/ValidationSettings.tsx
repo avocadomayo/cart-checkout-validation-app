@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { FunctionSettingsError } from "@shopify/ui-extensions-react/admin";
 import {
   reactExtension,
   useApi,
@@ -12,11 +11,15 @@ import {
   Banner,
   InlineStack,
   Image,
+  type FunctionSettingsError,
 } from "@shopify/ui-extensions-react/admin";
+import { type ValidationSettingsApi } from "@shopify/ui-extensions/admin";
+
+const TARGET = "admin.settings.validation.render";
 
 export default reactExtension(
-  "admin.settings.validation.render",
-  async (api) => {
+  TARGET,
+  async (api: ValidationSettingsApi<typeof TARGET>) => {
     const configuration = JSON.parse(
       api.data.validation?.metafields?.[0]?.value ?? "{}",
     );
@@ -51,7 +54,7 @@ function ValidationSettings({
     createSettings(products, configuration),
   );
 
-  const { applyMetafieldChange } = useApi("admin.settings.validation.render");
+  const { applyMetafieldChange } = useApi(TARGET);
 
   const onError = (errors: FunctionSettingsError[]) => {
     setErrors(errors.map((e) => e.message));

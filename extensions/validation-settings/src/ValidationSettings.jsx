@@ -13,28 +13,27 @@ import {
   Image,
 } from "@shopify/ui-extensions-react/admin";
 
-export default reactExtension(
-  "admin.settings.validation.render",
-  async (api) => {
-    const configuration = JSON.parse(
-      api.data.validation?.metafields?.[0]?.value ?? "{}",
-    );
+const TARGET = "admin.settings.validation.render";
 
-    if (!api.data.validation?.metafields) {
-      const metafieldDefinition = await createMetafieldDefinition();
+export default reactExtension(TARGET, async (api) => {
+  const configuration = JSON.parse(
+    api.data.validation?.metafields?.[0]?.value ?? "{}",
+  );
 
-      if (!metafieldDefinition) {
-        throw new Error("Failed to create metafield definition");
-      }
+  if (!api.data.validation?.metafields) {
+    const metafieldDefinition = await createMetafieldDefinition();
+
+    if (!metafieldDefinition) {
+      throw new Error("Failed to create metafield definition");
     }
+  }
 
-    const products = await getProducts();
+  const products = await getProducts();
 
-    return (
-      <ValidationSettings configuration={configuration} products={products} />
-    );
-  },
-);
+  return (
+    <ValidationSettings configuration={configuration} products={products} />
+  );
+});
 
 function ValidationSettings({ configuration, products }) {
   const [errors, setErrors] = useState([]);
@@ -44,7 +43,7 @@ function ValidationSettings({ configuration, products }) {
     createSettings(products, configuration),
   );
 
-  const { applyMetafieldChange } = useApi("admin.settings.validation.render");
+  const { applyMetafieldChange } = useApi(TARGET);
 
   const onError = (error) => {
     setErrors(errors.map((e) => e.message));
