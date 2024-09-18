@@ -39,10 +39,12 @@ export default reactExtension(
 function ValidationSettings({ configuration, products }) {
   const [errors, setErrors] = useState([]);
 
-  const { applyMetafieldChange } = useApi("admin.settings.validation.render");
-
   // Read existing product variant limits from metafield
-  const settings = createSettings(products, configuration);
+  const [settings, setSettings] = useState(
+    createSettings(products, configuration),
+  );
+
+  const { applyMetafieldChange } = useApi("admin.settings.validation.render");
 
   const onError = (error) => {
     setErrors(errors.map((e) => e.message));
@@ -50,17 +52,19 @@ function ValidationSettings({ configuration, products }) {
 
   const onChange = async (variant, value) => {
     setErrors([]);
-    const newSettings = {
-      ...settings,
+    setSettings((prev) => ({
+      ...prev,
       [variant.id]: Number(value),
-    };
+    }));
+  };
 
+  const onSave = async () => {
     // Write updated product variant limits to metafield
     const result = await applyMetafieldChange({
       type: "updateMetafield",
       namespace: "$app:product-limits",
       key: "product-limits-values",
-      value: JSON.stringify(newSettings),
+      value: JSON.stringify(settings),
     });
 
     if (result.type === "error") {
@@ -69,7 +73,7 @@ function ValidationSettings({ configuration, products }) {
   };
 
   return (
-    <FunctionSettings onError={onError}>
+    <FunctionSettings onSave={onSave} onError={onError}>
       <ErrorBanner errors={errors} />
       <BlockStack gap="large">
         <ProductQuantitySettings

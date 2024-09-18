@@ -3,7 +3,7 @@
 client_id = "673c3432a54a7176547f5ab3126bec7d"
 name = "cart-checkout-validation-app"
 handle = "cart-checkout-validation-app-2"
-application_url = "https://stadium-glasgow-candy-saver.trycloudflare.com"
+application_url = "https://proven-poison-arnold-behind.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "read_products,write_products"
 
 [auth]
 redirect_urls = [
-  "https://stadium-glasgow-candy-saver.trycloudflare.com/auth/callback",
-  "https://stadium-glasgow-candy-saver.trycloudflare.com/auth/shopify/callback",
-  "https://stadium-glasgow-candy-saver.trycloudflare.com/api/auth/callback"
+  "https://proven-poison-arnold-behind.trycloudflare.com/auth/callback",
+  "https://proven-poison-arnold-behind.trycloudflare.com/auth/shopify/callback",
+  "https://proven-poison-arnold-behind.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
