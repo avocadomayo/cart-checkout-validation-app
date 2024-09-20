@@ -13,37 +13,28 @@ import {
 
 const TARGET = "admin.settings.validation.render";
 
-export default extend(
-  TARGET,
-  async (root, api) => {
-    const configuration = JSON.parse(
-      api.data.validation?.metafields?.[0]?.value ?? "{}",
-    );
+export default extend(TARGET, async (root, api) => {
+  const configuration = JSON.parse(
+    api.data.validation?.metafields?.[0]?.value ?? "{}",
+  );
 
-    if (!api.data.validation?.metafields) {
-      const metafieldDefinition = await createMetafieldDefinition();
+  if (!api.data.validation?.metafields) {
+    const metafieldDefinition = await createMetafieldDefinition(api.query);
 
-      if (!metafieldDefinition) {
-        throw new Error("Failed to create metafield definition");
-      }
+    if (!metafieldDefinition) {
+      throw new Error("Failed to create metafield definition");
     }
+  }
 
-    const products = await getProducts();
+  const products = await getProducts(api.query);
 
-    renderValidationSettings(root, configuration, products, api);
-  },
-);
+  renderValidationSettings(root, configuration, products, api);
+});
 
-function renderValidationSettings(
-  root,
-  configuration,
-  products,
-  api,
-) {
+function renderValidationSettings(root, configuration, products, api) {
   let errors = [];
-    // Read existing product variant limits from metafield
-    let settings = createSettings(products, configuration);
-
+  // Read existing product variant limits from metafield
+  let settings = createSettings(products, configuration);
 
   const onError = (newErrors) => {
     errors = newErrors.map((e) => e.message);
@@ -83,10 +74,9 @@ function renderValidationSettings(
         Banner,
         {
           title: "Errors were encountered",
-          dismissible: true,
           tone: "critical",
         },
-        root.createComponent(Box, {}, error),
+        root.createComponent(Text, {}, error),
       ),
     );
   };
@@ -111,12 +101,7 @@ function renderValidationSettings(
   renderContent();
 }
 
-function renderProductQuantitySettings(
-  root,
-  product,
-  settings,
-  onChange,
-) {
+function renderProductQuantitySettings(root, product, settings, onChange) {
   const heading = root.createComponent(
     InlineStack,
     {},
@@ -133,11 +118,7 @@ function renderProductQuantitySettings(
     ),
   );
 
-  const renderVariant = (
-    variant,
-    settings,
-    root,
-  ) => {
+  const renderVariant = (variant, settings, root) => {
     const limit = settings[variant.id];
 
     return root.createComponent(
@@ -187,7 +168,7 @@ function renderProductQuantitySettings(
   );
 }
 
-async function getProducts() {
+async function getProducts(adminApiQuery) {
   const query = `#graphql
   query FetchProducts {
     products(first: 5) {
@@ -206,12 +187,9 @@ async function getProducts() {
     }
   }`;
 
-  const results = await fetch("shopify:admin/api/graphql.json", {
-    method: "POST",
-    body: JSON.stringify({ query }),
-  }).then((res) => res.json());
+  const result = await adminApiQuery(query);
 
-  return results?.data?.products?.nodes?.map(({ title, variants }) => {
+  return result?.data?.products.nodes.map(({ title, variants }) => {
     return {
       title,
       variants: variants.nodes.map((variant) => ({
@@ -223,7 +201,7 @@ async function getProducts() {
   });
 }
 
-async function createMetafieldDefinition() {
+async function createMetafieldDefinition(adminApiQuery) {
   const definition = {
     access: {
       admin: "MERCHANT_READ_WRITE",
@@ -245,25 +223,13 @@ async function createMetafieldDefinition() {
       }
   `;
 
-  async function adminApiRequest(query, variables = null) {
-    const results = await fetch("shopify:admin/api/graphql.json", {
-      method: "POST",
-      body: JSON.stringify({ query, variables }),
-    }).then((res) => res.json());
-
-    return results;
-  }
-
   const variables = { definition };
-  const results = await adminApiRequest(query, variables);
+  const result = await adminApiQuery(query, { variables });
 
-  return results?.data?.metafieldDefinitionCreate?.createdDefinition;
+  return result?.data?.metafieldDefinitionCreate?.createdDefinition;
 }
 
-function createSettings(
-  products,
-  configuration,
-) {
+function createSettings(products, configuration) {
   const settings = {};
 
   products.forEach(({ variants }) => {
