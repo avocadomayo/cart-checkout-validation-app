@@ -21,14 +21,14 @@ export default reactExtension(TARGET, async (api) => {
   );
 
   if (!api.data.validation?.metafields) {
-    const metafieldDefinition = await createMetafieldDefinition();
+    const metafieldDefinition = await createMetafieldDefinition(api.query);
 
     if (!metafieldDefinition) {
       throw new Error("Failed to create metafield definition");
     }
   }
 
-  const products = await getProducts();
+  const products = await getProducts(api.query);
 
   return (
     <ValidationSettings configuration={configuration} products={products} />
@@ -142,20 +142,15 @@ function ErrorBanner({ errors }) {
   return (
     <Box paddingBlockEnd="large">
       {errors.map((error, i) => (
-        <Banner
-          key={i}
-          title="Errors were encountered"
-          tone="critical"
-          dismissible
-        >
-          <Box>{error}</Box>
+        <Banner key={i} title="Errors were encountered" tone="critical">
+          {error}
         </Banner>
       ))}
     </Box>
   );
 }
 
-async function getProducts() {
+async function getProducts(adminApiQuery) {
   const query = `#graphql
   query FetchProducts {
     products(first: 5) {
@@ -174,12 +169,9 @@ async function getProducts() {
     }
   }`;
 
-  const results = await fetch("shopify:admin/api/graphql.json", {
-    method: "POST",
-    body: JSON.stringify({ query }),
-  }).then((res) => res.json());
+  const result = await adminApiQuery(query);
 
-  return results?.data?.products?.nodes?.map(({ title, variants }) => {
+  return result?.data?.products.nodes.map(({ title, variants }) => {
     return {
       title,
       variants: variants.nodes.map((variant) => ({
@@ -191,16 +183,7 @@ async function getProducts() {
   });
 }
 
-async function adminApiRequest(query, variables = null) {
-  const results = await fetch("shopify:admin/api/graphql.json", {
-    method: "POST",
-    body: JSON.stringify({ query, variables }),
-  }).then((res) => res.json());
-
-  return results;
-}
-
-async function createMetafieldDefinition() {
+async function createMetafieldDefinition(adminApiQuery) {
   const definition = {
     access: {
       admin: "MERCHANT_READ_WRITE",
@@ -223,9 +206,9 @@ async function createMetafieldDefinition() {
   `;
 
   const variables = { definition };
-  const results = await adminApiRequest(query, variables);
+  const result = await adminApiQuery(query, { variables });
 
-  return results?.data?.metafieldDefinitionCreate?.createdDefinition;
+  return result?.data?.metafieldDefinitionCreate?.createdDefinition;
 }
 
 function createSettings(products, configuration) {

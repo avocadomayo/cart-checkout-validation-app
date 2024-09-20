@@ -25,14 +25,14 @@ export default reactExtension(
     );
 
     if (!api.data.validation?.metafields) {
-      const metafieldDefinition = await createMetafieldDefinition();
+      const metafieldDefinition = await createMetafieldDefinition(api.query);
 
       if (!metafieldDefinition) {
         throw new Error("Failed to create metafield definition");
       }
     }
 
-    const products = await getProducts();
+    const products = await getProducts(api.query);
 
     return (
       <ValidationSettings configuration={configuration} products={products} />
@@ -158,13 +158,8 @@ function ErrorBanner({ errors }: { errors: string[] }) {
   return (
     <Box paddingBlockEnd="large">
       {errors.map((error, i) => (
-        <Banner
-          key={i}
-          title="Errors were encountered"
-          tone="critical"
-          dismissible
-        >
-          <Box>{error}</Box>
+        <Banner key={i} title="Errors were encountered" tone="critical">
+          {error}
         </Banner>
       ))}
     </Box>
@@ -182,7 +177,9 @@ type ProductVariant = {
   imageUrl?: string;
 };
 
-async function getProducts(): Promise<Product[]> {
+async function getProducts(
+  adminApiQuery: ValidationSettingsApi<typeof TARGET>["query"],
+): Promise<Product[]> {
   const query = `#graphql
   query FetchProducts {
     products(first: 5) {
@@ -201,33 +198,42 @@ async function getProducts(): Promise<Product[]> {
     }
   }`;
 
-  const results = await fetch("shopify:admin/api/graphql.json", {
-    method: "POST",
-    body: JSON.stringify({ query }),
-  }).then((res) => res.json());
-
-  return results?.data?.products?.nodes?.map(({ title, variants }) => {
-    return {
-      title,
-      variants: variants.nodes.map((variant) => ({
-        title: variant.title,
-        id: variant.id,
-        imageUrl: variant?.image?.url,
-      })),
+  type ProductQueryData = {
+    products: {
+      nodes: Array<{
+        title: string;
+        variants: {
+          nodes: Array<{
+            id: string;
+            title: string;
+            image?: {
+              url: string;
+            };
+          }>;
+        };
+      }>;
     };
-  });
+  };
+
+  const results = await adminApiQuery<ProductQueryData>(query);
+
+  return (
+    results?.data?.products.nodes.map(({ title, variants }) => {
+      return {
+        title,
+        variants: variants.nodes.map((variant) => ({
+          title: variant.title,
+          id: variant.id,
+          imageUrl: variant?.image?.url,
+        })),
+      };
+    }) ?? []
+  );
 }
 
-async function adminApiRequest(query: string, variables: any | null = null) {
-  const results = await fetch("shopify:admin/api/graphql.json", {
-    method: "POST",
-    body: JSON.stringify({ query, variables }),
-  }).then((res) => res.json());
-
-  return results;
-}
-
-async function createMetafieldDefinition() {
+async function createMetafieldDefinition(
+  adminApiQuery: ValidationSettingsApi<typeof TARGET>["query"],
+) {
   const definition = {
     access: {
       admin: "MERCHANT_READ_WRITE",
@@ -249,10 +255,20 @@ async function createMetafieldDefinition() {
       }
   `;
 
-  const variables = { definition };
-  const results = await adminApiRequest(query, variables);
+  type MetafieldDefinitionCreateData = {
+    metafieldDefinitionCreate: {
+      createdDefinition?: {
+        id: string;
+      };
+    };
+  };
 
-  return results?.data?.metafieldDefinitionCreate?.createdDefinition;
+  const variables = { definition };
+  const result = await adminApiQuery<MetafieldDefinitionCreateData>(query, {
+    variables,
+  });
+
+  return result?.data?.metafieldDefinitionCreate?.createdDefinition;
 }
 
 function createSettings(
