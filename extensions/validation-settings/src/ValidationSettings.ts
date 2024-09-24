@@ -19,17 +19,16 @@ const TARGET = "admin.settings.validation.render";
 export default extend(
   TARGET,
   async (root: RemoteRoot, api: ValidationSettingsApi<typeof TARGET>) => {
-    const configuration = JSON.parse(
-      api.data.validation?.metafields?.[0]?.value ?? "{}",
-    );
-
-    if (!api.data.validation?.metafields) {
+    const metafields = api.data.validation?.metafields;
+    if (!metafields) {
       const metafieldDefinition = await createMetafieldDefinition(api.query);
 
       if (!metafieldDefinition) {
         throw new Error("Failed to create metafield definition");
       }
     }
+
+    const configuration = JSON.parse(metafields?.[0]?.value ?? "{}");
 
     const products = await getProducts(api.query);
 
