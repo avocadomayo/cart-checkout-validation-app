@@ -19,8 +19,8 @@ const TARGET = "admin.settings.validation.render";
 export default extend(
   TARGET,
   async (root: RemoteRoot, api: ValidationSettingsApi<typeof TARGET>) => {
-    const metafields = api.data.validation?.metafields;
-    if (!metafields) {
+    const existingDefinition = await getMetafieldDefinition(api.query);
+    if (!existingDefinition) {
       const metafieldDefinition = await createMetafieldDefinition(api.query);
 
       if (!metafieldDefinition) {
@@ -28,7 +28,9 @@ export default extend(
       }
     }
 
-    const configuration = JSON.parse(metafields?.[0]?.value ?? "{}");
+    const configuration = JSON.parse(
+      api.data.validation?.metafields?.[0]?.value ?? "{}",
+    );
 
     const products = await getProducts(api.query);
 
@@ -253,6 +255,35 @@ async function getProducts(
   );
 }
 
+const METAFIELD_NAMESPACE = "$app:product-limits";
+const METAFIELD_KEY = "product-limits-values";
+
+async function getMetafieldDefinition(
+  adminApiQuery: ValidationSettingsApi<typeof TARGET>["query"],
+) {
+  const query = `#graphql
+    query GetMetafieldDefinition {
+      metafieldDefinitions(first: 1, ownerType: VALIDATION, namespace: "${METAFIELD_NAMESPACE}", key: "${METAFIELD_KEY}") {
+        nodes {
+          id
+        }
+      }
+    }
+  `;
+
+  type MetafieldDefinitionsQueryData = {
+    metafieldDefinitions: {
+      nodes: Array<{
+        id: string;
+      }>;
+    };
+  };
+
+  const result = await adminApiQuery<MetafieldDefinitionsQueryData>(query);
+
+  return result?.data?.metafieldDefinitions?.nodes[0];
+}
+
 async function createMetafieldDefinition(
   adminApiQuery: ValidationSettingsApi<typeof TARGET>["query"],
 ) {
@@ -260,9 +291,9 @@ async function createMetafieldDefinition(
     access: {
       admin: "MERCHANT_READ_WRITE",
     },
-    key: "product-limits-values",
+    key: METAFIELD_KEY,
     name: "Validation Configuration",
-    namespace: "$app:product-limits",
+    namespace: METAFIELD_NAMESPACE,
     ownerType: "VALIDATION",
     type: "json",
   };
