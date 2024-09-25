@@ -75,13 +75,11 @@ function ValidationSettings({ configuration, products }) {
   return (
     <FunctionSettings onSave={onSave} onError={onError}>
       <ErrorBanner errors={errors} />
-      <BlockStack gap="large">
-        <ProductQuantitySettings
-          products={products}
-          settings={settings}
-          onChange={onChange}
-        />
-      </BlockStack>
+      <ProductQuantitySettings
+        products={products}
+        settings={settings}
+        onChange={onChange}
+      />
     </FunctionSettings>
   );
 }

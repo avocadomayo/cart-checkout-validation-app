@@ -88,12 +88,8 @@ function renderValidationSettings(root, configuration, products, api) {
         FunctionSettings,
         { onSave, onError },
         ...renderErrors(errors, root),
-        root.createComponent(
-          BlockStack,
-          { gap: "large" },
-          products.map((product) =>
-            renderProductQuantitySettings(root, product, settings, onChange),
-          ),
+        ...products.map((product) =>
+          renderProductQuantitySettings(root, product, settings, onChange),
         ),
       ),
     );
