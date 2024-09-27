@@ -44,23 +44,22 @@ function renderValidationSettings(root, configuration, products, api) {
 
   const onChange = async (variant, value) => {
     errors = [];
-    settings = {
+    const newSettings = {
       ...settings,
       [variant.id]: Number(value),
     };
-  };
+    settings = newSettings;
 
-  const onSave = async () => {
-    // Write updated product variant limits to metafield
-    const results = await api.applyMetafieldChange({
+    // Commit updated product variant limits to memory. The changes are persisted on save.
+    const result = await api.applyMetafieldChange({
       type: "updateMetafield",
       namespace: "$app:product-limits",
       key: "product-limits-values",
-      value: JSON.stringify(settings),
+      value: JSON.stringify(newSettings),
     });
 
-    if (results.type === "error") {
-      errors = [results.message];
+    if (result.type === "error") {
+      errors = [result.message];
       renderContent();
     }
   };
@@ -86,7 +85,7 @@ function renderValidationSettings(root, configuration, products, api) {
     return root.append(
       root.createComponent(
         FunctionSettings,
-        { onSave, onError },
+        { onError },
         ...renderErrors(errors, root),
         ...products.map((product) =>
           renderProductQuantitySettings(root, product, settings, onChange),
