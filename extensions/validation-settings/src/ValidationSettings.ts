@@ -21,6 +21,7 @@ export default extend(
   async (root: RemoteRoot, api: ValidationSettingsApi<typeof TARGET>) => {
     const existingDefinition = await getMetafieldDefinition(api.query);
     if (!existingDefinition) {
+      // Creates a metafield definition for persistence if no pre-existing definition exists
       const metafieldDefinition = await createMetafieldDefinition(api.query);
 
       if (!metafieldDefinition) {
@@ -28,10 +29,12 @@ export default extend(
       }
     }
 
+    // Read existing persisted data about product limits from the associated metafield
     const configuration = JSON.parse(
       api.data.validation?.metafields?.[0]?.value ?? "{}",
     );
 
+    // Query product data needed to render the settings UI
     const products = await getProducts(api.query);
 
     renderValidationSettings(root, configuration, products, api);
@@ -45,8 +48,7 @@ function renderValidationSettings(
   api: ValidationSettingsApi<typeof TARGET>,
 ) {
   let errors: string[] = [];
-
-  // Read existing product variant limits from metafield
+  // State to keep track of product limit settings, initialized to any persisted metafield value
   let settings = createSettings(products, configuration);
 
   const onError = (newErrors: FunctionSettingsError[]) => {
@@ -62,7 +64,8 @@ function renderValidationSettings(
     };
     settings = newSettings;
 
-    // Commit updated product variant limits to memory. The changes are persisted on save.
+    // On input change, commit updated product variant limits to memory.
+    // Caution: the changes are only persisted on save!
     const result = await api.applyMetafieldChange({
       type: "updateMetafield",
       namespace: "$app:product-limits",
@@ -96,6 +99,7 @@ function renderValidationSettings(
   const renderContent = () => {
     return root.append(
       root.createComponent(
+        // Note: FunctionSettings must be rendered for the host to receive metafield updates
         FunctionSettings,
         { onError },
         ...renderErrors(errors, root),
@@ -171,6 +175,7 @@ function renderProductQuantitySettings(
     );
   };
 
+  // Render table of product variants and inputs to assign limits
   return root.createComponent(
     Section,
     { heading: product.title },
@@ -327,6 +332,7 @@ function createSettings(
 
   products.forEach(({ variants }) => {
     variants.forEach(({ id }) => {
+      // Read existing product limits from metafield
       const limit = configuration[id];
 
       if (limit) {
