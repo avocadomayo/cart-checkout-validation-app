@@ -16,7 +16,7 @@ const TARGET = "admin.settings.validation.render";
 export default extend(TARGET, async (root, api) => {
   const existingDefinition = await getMetafieldDefinition(api.query);
   if (!existingDefinition) {
-    // Creates a metafield definition for persistence if no pre-existing definition exists
+    // Create a metafield definition for persistence if no pre-existing definition exists
     const metafieldDefinition = await createMetafieldDefinition(api.query);
 
     if (!metafieldDefinition) {

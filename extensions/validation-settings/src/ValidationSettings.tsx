@@ -22,7 +22,7 @@ export default reactExtension(
   async (api: ValidationSettingsApi<typeof TARGET>) => {
     const existingDefinition = await getMetafieldDefinition(api.query);
     if (!existingDefinition) {
-      // Creates a metafield definition for persistence if no pre-existing definition exists
+      // Create a metafield definition for persistence if no pre-existing definition exists
       const metafieldDefinition = await createMetafieldDefinition(api.query);
 
       if (!metafieldDefinition) {
